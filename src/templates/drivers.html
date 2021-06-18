@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}
+    Drivers
+{% endblock title %}
+{% block content %}
+    {% for driver in drivers %}
+        <p>
+        {{ driver.name }} - {{ driver.abbr }}
+        </p>
+    {% endfor %}
+{% endblock content %}
+
