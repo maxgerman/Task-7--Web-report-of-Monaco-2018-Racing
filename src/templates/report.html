@@ -7,9 +7,8 @@
 <form action="{{url_for('common_report')}}" method="POST">
     <div class="form-check form-switch">
         <input name="desc_switch" class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" onclick="this.form.submit()"
-            {% if session['desc_switch'] == True %}
+            {% if session['report_desc_switch'] == True %}
             checked
-            {% else %}
             {% endif %}
         >
         <label class="form-check-label" for="flexSwitchCheckChecked">descending order</label>

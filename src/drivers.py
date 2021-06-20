@@ -32,7 +32,7 @@ class Driver:
         Returns the pretty string with the driver's statistics
     """
 
-    driver_list = []
+    _driver_list = []
 
     def __init__(self, abbr=None, name=None, team=None, start_time=None, stop_time=None,
                  best_lap=None):
@@ -87,7 +87,6 @@ class Driver:
                 drivers.append(new_driver)
         return drivers
 
-
     @staticmethod
     def _parse_logs(drivers: list, data_path: str = DATA_PATH) -> list:
         """
@@ -125,11 +124,11 @@ class Driver:
             if driver.start_time > driver.stop_time:
                 driver.start_time, driver.stop_time = driver.stop_time, driver.start_time
             driver.best_lap = driver.stop_time - driver.start_time
-        Driver.driver_list = drivers
+        Driver._driver_list = drivers
         return drivers
 
     @staticmethod
-    def _print_report(asc: bool = True, driver_query: str = None) -> str:
+    def print_report(asc: bool = True, driver_query: str = None) -> str:
         """
         Pretty print the report of drivers statistics.
         Sorted by best lap time.
@@ -143,13 +142,13 @@ class Driver:
         """
 
         if driver_query:
-            for d in Driver.driver_list:
+            for d in Driver._driver_list:
                 if driver_query.lower() in d.name.lower() or driver_query.lower() in d.abbr.lower():
                     return d.statistics()
             else:
                 return 'Driver not found'
         else:
-            sorted_drivers = sorted(Driver.driver_list, key=lambda dr: dr.best_lap)
+            sorted_drivers = sorted(Driver._driver_list, key=lambda dr: dr.best_lap)
             res_table = ['{:2d}. '.format(i + 1) + driver.statistics() for i, driver in enumerate(sorted_drivers)]
             if asc:
                 res_table.insert(15, '-' * 60)
@@ -160,8 +159,13 @@ class Driver:
 
     @staticmethod
     def all(asc=True):
-        return Driver._print_report(asc=asc)
+        """Return the list of drivers in requested order"""
+        Driver._driver_list.sort(key=lambda d: d.name, reverse=not asc)
+        return Driver._driver_list
 
     @staticmethod
-    def get(driver_id):
-        return Driver._print_report(driver_query=driver_id)
+    def get_by_id(driver_id):
+        """Return driver object by id or name. Return None if not found"""
+        for d in Driver._driver_list:
+            if driver_id.lower() in d.name.lower() or driver_id.lower() in d.abbr.lower():
+                return [d]

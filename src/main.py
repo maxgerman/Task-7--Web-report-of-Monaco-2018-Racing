@@ -4,45 +4,58 @@ from src.drivers import Driver
 app = Flask(__name__)
 app.secret_key = '123'
 
+
 @app.route('/report', methods=['GET', 'POST'])
 def common_report():
-    """Show common statistics of all drivers"""
+    """
+    Show the report for all drivers.
+    Sort and set the order switch based on url for the template. 
+    """
     if request.args.get('order') == 'desc':
         asc_order = False
     else:
         asc_order = True
-    session['desc_switch'] = not asc_order
+    session['report_desc_switch'] = not asc_order
 
     if request.method == 'POST':
         if request.form.get('desc_switch'):
-            session['desc_switch'] = True
-            return redirect(url_for('common_report', order='desc'))            
+            session['report_desc_switch'] = True
+            return redirect(url_for('common_report', order='desc'))
         else:
-            session['desc_switch'] = False
+            session['report_desc_switch'] = False
             return redirect(url_for('common_report'))
-            print('asc')
 
-    lines = Driver.all(asc=asc_order).split('\n')
+    lines = Driver.print_report(asc=asc_order).split('\n')
     return render_template('report.html', lines=lines)
 
 
-@app.route('/drivers')
+@app.route('/drivers', methods=['GET', 'POST'])
 def list_drivers():
     """Show ordered driver list as 'name - abbreviation' """
+
+    if request.method == 'POST':
+        if request.form.get('desc_switch'):
+            session['driver_desc_switch'] = True
+            return redirect(url_for('list_drivers', order='desc'))
+        else:
+            session['driver_desc_switch'] = False
+            return redirect(url_for('list_drivers'))
+
     driver_id = request.args.get('driver_id')
     if driver_id:
-        return Driver.get(driver_id)
+        drivers = Driver.get_by_id(driver_id)
     else:
-        desc_order = True if request.args.get('order') == 'desc' else False
-        drivers = sorted(Driver.driver_list, key=lambda d: d.name, reverse=desc_order)
-        # return '<br>'.join(driver.name + ' ' + driver.abbr for driver in drivers)
-        return render_template('drivers.html', drivers=drivers)
+        asc_order = False if request.args.get('order') == 'desc' else True
+        drivers = Driver.all(asc=asc_order)
+    return render_template('drivers.html', drivers=drivers)
+
 
 
 
 @app.route('/')
 def home():
     return redirect(url_for('common_report'))
+
 
 if __name__ == '__main__':
     Driver.build_report()
