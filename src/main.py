@@ -7,14 +7,15 @@ app = Flask(__name__)
 app.secret_key = '123'
 
 
-def wiki(driver_name):
+def wiki(driver_name: str) -> str:
     """Return the info about driver from wikipedia"""
     content = wikipedia.page(driver_name).content
     with_headings = re.sub(r'=+\s*(.*?)\s*=+', r'<b>\1</b>', content)
     return with_headings
 
+
 @app.route('/report', methods=['GET', 'POST'])
-def common_report():
+def common_report() -> HttpResponse:
     """
     Show the report for all drivers.
     Sort and set the order switch based on url for the template. 
@@ -38,7 +39,7 @@ def common_report():
 
 
 @app.route('/drivers', methods=['GET', 'POST'])
-def list_drivers():
+def list_drivers() -> HttpResponse:
     """Show ordered driver list as 'name - abbreviation' """
 
     if request.method == 'POST':
@@ -60,13 +61,11 @@ def list_drivers():
     else:
         asc_order = False if request.args.get('order') == 'desc' else True
         drivers = Driver.all(asc=asc_order)
-    return render_template('drivers.html', drivers=drivers, driver_info = driver_info)
-
-
+    return render_template('drivers.html', drivers=drivers, driver_info=driver_info)
 
 
 @app.route('/')
-def home():
+def home() -> HttpResponse:
     return redirect(url_for('common_report'))
 
 

@@ -9,28 +9,45 @@ END_LOG_FILE = 'end.log'
 
 class Driver:
     """
-    A class to represent a driver.
+        A class to represent a driver.
 
-    Attributes
-    ----------
-    abbr : str
-        name abbreviation as in abbreviation file
-    name : str
-        driver's name
-    team : str
-        driver's team
-    start_time : datetime
-        start time of the lap
-    stop_time : datetime
-        finish time of the lap
-    best_lap : timedelta
-        time of the best lap
+        Attributes
+        ----------
 
-    Methods
-    -------
-    statistics : str
-        Returns the pretty string with the driver's statistics
-    """
+        _driver_list : list
+            list of driver objects
+        abbr : str
+            name abbreviation as in abbreviation file
+        name : str
+            driver's name
+        team : str
+            driver's team
+        start_time : datetime
+            start time of the lap
+        stop_time : datetime
+            finish time of the lap
+        best_lap : timedelta
+            time of the best lap
+
+        Methods
+        -------
+        statistics : str
+            Return the pretty string with the driver's statistics
+        build_report : list
+            Build report from logs, return complete list of drivers with info
+
+            _drivers_from_abbr : list
+                Return the list of drivers from data files
+            _parse_logs : list
+                Return the list of drivers with updated times from parsing of log files
+
+        print_report : str
+            Return the statistics of all or one driver
+        all : list
+            Return the list of driver objects
+        get_by_id : list
+            Return the list of one driver object (by id or name)
+        """
 
     _driver_list = []
 
@@ -46,34 +63,10 @@ class Driver:
     def __repr__(self):
         return f'Driver ({self.__dict__})'
 
-    def statistics(self):
+    def statistics(self) -> str:
         return '{:<20} | {:<25} | {}'.format(self.name, self.team, str(self.best_lap)[:-3])
 
-    def get_start_time(self, data_path=DATA_PATH):
-        """Parse and calc start, stop and best lap times for a particular driver.
-        Replaces 'parse_logs' function used for parsing all drivers at once"""
-        with open(os.path.join(data_path, START_LOG_FILE), 'r', encoding='UTF-8') as f:
-            lines = [line for line in f if line.strip()]
-            for line in lines:
-                abbr, start_time = line[:3], line.split('_')[1].rstrip()
-                if self.abbr == abbr:
-                    self.start_time = dt.datetime.strptime(start_time, "%H:%M:%S.%f")
-                    break
-
-    def get_stop_time(self, data_path=DATA_PATH):
-        with open(os.path.join(data_path, END_LOG_FILE), 'r', encoding='UTF-8') as f:
-            lines = [line for line in f if line.strip()]
-            for line in lines:
-                abbr, stop_time = line[:3], line.split('_')[1].rstrip()
-                if self.abbr == abbr:
-                    self.stop_time = dt.datetime.strptime(stop_time, "%H:%M:%S.%f")
-                    break
-
-    def get_best_lap_time(self):
-        if self.start_time > self.stop_time:
-            self.start_time, self.stop_time = self.stop_time, self.start_time
-        self.best_lap = self.stop_time - self.start_time
-
+    @staticmethod
     def _drivers_from_abbr(data_path: str = DATA_PATH, abbr_file=ABBR_FILE) -> list:
         """
         Return the list of driver instances each with their name, abbreviation and team parsed from the
@@ -158,13 +151,13 @@ class Driver:
             return report
 
     @staticmethod
-    def all(asc=True):
+    def all(asc=True) -> list:
         """Return the list of drivers in requested order"""
         Driver._driver_list.sort(key=lambda d: d.name, reverse=not asc)
         return Driver._driver_list
 
     @staticmethod
-    def get_by_id(driver_id):
+    def get_by_id(driver_id) -> list:
         """Return driver object by id or name. Return None if not found"""
         for d in Driver._driver_list:
             if driver_id.lower() in d.name.lower() or driver_id.lower() in d.abbr.lower():
