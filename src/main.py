@@ -1,9 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+import wikipedia
+import re
 from src.drivers import Driver
 
 app = Flask(__name__)
 app.secret_key = '123'
 
+
+def wiki(driver_name):
+    """Return the info about driver from wikipedia"""
+    content = wikipedia.page(driver_name).content
+    with_headings = re.sub(r'=+\s*(.*?)\s*=+', r'<b>\1</b>', content)
+    return with_headings
 
 @app.route('/report', methods=['GET', 'POST'])
 def common_report():
@@ -42,12 +50,17 @@ def list_drivers():
             return redirect(url_for('list_drivers'))
 
     driver_id = request.args.get('driver_id')
+    driver_info = ''
     if driver_id:
         drivers = Driver.get_by_id(driver_id)
+        try:
+            driver_info = wiki(drivers[0].name)
+        except (TypeError, IndexError, wikipedia.PageError):
+            driver_info = None
     else:
         asc_order = False if request.args.get('order') == 'desc' else True
         drivers = Driver.all(asc=asc_order)
-    return render_template('drivers.html', drivers=drivers)
+    return render_template('drivers.html', drivers=drivers, driver_info = driver_info)
 
 
 

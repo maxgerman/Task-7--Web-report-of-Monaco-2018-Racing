@@ -169,3 +169,5 @@ class Driver:
         for d in Driver._driver_list:
             if driver_id.lower() in d.name.lower() or driver_id.lower() in d.abbr.lower():
                 return [d]
+        else:
+            return []

@@ -4,6 +4,10 @@
 {% endblock title %}
 {% block content %}
 
+    {% if drivers|length == 0 %}
+        <b>Driver not found</b>
+    {% endif %}
+
     {% if drivers|length > 1 %}
     <form action="" method="POST">
         <div class="form-check form-switch">
@@ -24,5 +28,14 @@
             </a>
         </p>
     {% endfor %}
+
+    {% autoescape false %}
+    {% if drivers|length == 1 and driver_info %}
+    <div class = "driver_info">
+        {{ driver_info|replace('\n', '<br>') }}
+    </div>
+    {% endif %}
+    {% endautoescape %}
+
 {% endblock content %}
 
