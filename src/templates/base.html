@@ -6,9 +6,11 @@
         {% block title %} {% endblock title %}
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <link rel="stylesheet" href="static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+
+
 <div class="container">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
@@ -39,7 +41,15 @@
 </div>
 
 
+
+
 <div class="container">
+{% if error %}
+<div class="errors">
+    <h2> Error {{ error }} occured! </h2>
+</div>
+{% endif %}
+
     {% block content %}
     {% endblock content %}
 </div>

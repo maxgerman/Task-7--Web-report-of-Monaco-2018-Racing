@@ -4,7 +4,7 @@ import re
 from src.drivers import Driver
 
 app = Flask(__name__)
-app.secret_key = '123'
+app.secret_key = 'dev'
 
 
 def wiki(driver_name: str) -> str:
@@ -15,7 +15,7 @@ def wiki(driver_name: str) -> str:
 
 
 @app.route('/report', methods=['GET', 'POST'])
-def common_report() -> HttpResponse:
+def common_report() -> "Response":
     """
     Show the report for all drivers.
     Sort and set the order switch based on url for the template. 
@@ -39,9 +39,8 @@ def common_report() -> HttpResponse:
 
 
 @app.route('/drivers', methods=['GET', 'POST'])
-def list_drivers() -> HttpResponse:
+def list_drivers() -> "Response":
     """Show ordered driver list as 'name - abbreviation' """
-
     if request.method == 'POST':
         if request.form.get('desc_switch'):
             session['driver_desc_switch'] = True
@@ -60,13 +59,23 @@ def list_drivers() -> HttpResponse:
             driver_info = None
     else:
         asc_order = False if request.args.get('order') == 'desc' else True
+        session['driver_desc_switch'] = not asc_order
         drivers = Driver.all(asc=asc_order)
     return render_template('drivers.html', drivers=drivers, driver_info=driver_info)
 
 
 @app.route('/')
-def home() -> HttpResponse:
+def home() -> "Response":
     return redirect(url_for('common_report'))
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('base.html', error=404)
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('base.html', context=500)
 
 
 if __name__ == '__main__':
